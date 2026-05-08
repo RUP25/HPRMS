@@ -1,0 +1,8 @@
+node_modules/
+.env
+db/hprms.sqlite
+db/hprms.sqlite-journal
+qr-codes/*.png
+qr-codes/*.pdf
+*.log
+.DS_Store

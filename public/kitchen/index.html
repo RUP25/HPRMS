@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dopwai Kitchen Display - Hotel Poinisuk</title>
+  <meta name="theme-color" content="#1a1024">
+  <link rel="icon" href="/assets/logo.png">
+  <link rel="stylesheet" href="/shared/theme.css">
+  <link rel="stylesheet" href="/shared/kds.css">
+</head>
+<body>
+  <div id="kdsLoginGate" class="login-gate">
+    <div class="login-card">
+      <img src="/assets/logo.png" alt="Hotel Poinisuk">
+      <h1>Dopwai Kitchen</h1>
+      <p class="muted">Enter the kitchen PIN from your manager.</p>
+      <input id="kdsPinInput" type="password" maxlength="32" inputmode="numeric" autocomplete="current-password" placeholder="PIN" aria-label="Kitchen PIN">
+      <button type="button" class="btn" id="kdsLoginBtn">Unlock display</button>
+      <p id="kdsLoginErr" class="loginerr"></p>
+    </div>
+  </div>
+
+  <header class="kds-hdr" id="kdsAppHdr" hidden>
+    <img src="/assets/logo.png" alt="Hotel Poinisuk">
+    <div>
+      <div class="title">Dopwai Kitchen</div>
+      <div style="color:#d6c1e7;font-size:12px;letter-spacing:2px;text-transform:uppercase">Hotel Poinisuk</div>
+    </div>
+    <span class="badge">KITCHEN</span>
+    <div class="right">
+      <span id="kdsCount">0 active</span>
+      <span class="pulse" title="live"></span>
+      <button type="button" class="btn ghost" id="kdsLogoutBtn" style="margin-left:10px;font-size:12px;padding:8px 12px">Sign out</button>
+    </div>
+  </header>
+  <main id="kdsGrid" class="kds-grid" hidden></main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/shared/util.js"></script>
+  <script src="/shared/notify.js"></script>
+  <script src="/shared/kds.js"></script>
+  <script>HPRMS_KDS('KITCHEN');</script>
+</body>
+</html>

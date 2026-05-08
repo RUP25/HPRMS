@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin - Hotel Poinisuk RMS</title>
+  <link rel="icon" href="/assets/logo.png">
+  <link rel="stylesheet" href="/shared/theme.css">
+  <link rel="stylesheet" href="/admin/styles.css">
+</head>
+<body>
+  <div id="admLoginGate" class="login-gate">
+    <div class="login-card">
+      <img src="/assets/logo.png" alt="Hotel Poinisuk">
+      <h1>Manager Console</h1>
+      <p class="muted">Enter the admin PIN (see <code>.env</code> <code>ADMIN_PIN</code>).</p>
+      <input id="admPinInput" type="tel" maxlength="32" inputmode="numeric" autocomplete="off" placeholder="PIN" aria-label="Admin PIN">
+      <button type="button" class="btn" id="admLoginBtn">Sign in</button>
+      <p id="admLoginErr" class="loginerr"></p>
+    </div>
+  </div>
+
+  <header class="adm-hdr">
+    <div class="brand-mark">
+      <img src="/assets/logo.png" alt="Hotel Poinisuk">
+      <div>
+        <div class="name">Hotel Poinisuk</div>
+        <div class="sub">Restaurant Management Console</div>
+      </div>
+    </div>
+    <nav class="adm-nav">
+      <button class="navbtn active" data-tab="floor">Floor</button>
+      <button class="navbtn" data-tab="bills">Bills &amp; IDS</button>
+      <button class="navbtn" data-tab="menu">Menu</button>
+      <button class="navbtn" data-tab="stewards">Stewards</button>
+      <button class="navbtn" data-tab="qr">QR Codes</button>
+    </nav>
+    <div class="ids-state">
+      <span id="idsDot" class="dot"></span>
+      <span id="idsLabel">IDS</span>
+      <button type="button" class="btn ghost" id="admLogoutBtn" style="margin-left:12px;font-size:12px;padding:8px 12px">Sign out</button>
+    </div>
+  </header>
+
+  <main class="adm-main">
+    <section id="tab-floor" class="tab-panel">
+      <div class="tab-h"><h2>Live Floor</h2><div class="muted" id="floorMeta"></div></div>
+      <div id="floorGrid" class="floor-grid"></div>
+    </section>
+
+    <section id="tab-bills" class="tab-panel" hidden>
+      <div class="tab-h">
+        <h2>Bills &amp; IDS Posting</h2>
+        <div>
+          <label class="muted"><input type="checkbox" id="showAllBills"> Show all</label>
+        </div>
+      </div>
+      <div id="billsList" class="bills-list"></div>
+    </section>
+
+    <section id="tab-menu" class="tab-panel" hidden>
+      <div class="tab-h">
+        <h2>Menu Catalog</h2>
+        <div class="menu-toolbar">
+          <input id="menuSearch" type="search" placeholder="Search by name, code, or category..." autocomplete="off">
+          <select id="menuOutletFilter">
+            <option value="">All outlets</option>
+            <option value="klong">Klong (Bar)</option>
+            <option value="dopwai">Dopwai (Restaurant)</option>
+          </select>
+          <button class="btn" id="menuAddBtn">+ Add Item</button>
+        </div>
+      </div>
+      <div class="muted" id="menuMeta" style="margin-bottom:10px"></div>
+      <div id="menuList" class="menu-admin"></div>
+    </section>
+
+    <section id="tab-stewards" class="tab-panel" hidden>
+      <div class="tab-h">
+        <h2>Stewards</h2>
+        <div class="menu-toolbar">
+          <button type="button" class="btn" id="stewardAddBtn">+ Add steward</button>
+        </div>
+      </div>
+      <div class="muted" style="margin-bottom:10px">Active load &amp; deliveries today</div>
+      <div id="stewardList" class="steward-list"></div>
+    </section>
+
+    <section id="tab-qr" class="tab-panel" hidden>
+      <div class="tab-h"><h2>Table QR Codes</h2></div>
+      <p class="muted">Print these and place on the corresponding tables. Guests scan to open the menu.</p>
+      <p class="muted">Run <code>npm run qr</code> in the project root to (re)generate a printable PDF/HTML sheet in the <code>qr-codes/</code> folder.</p>
+      <div id="qrGrid" class="qr-grid"></div>
+    </section>
+  </main>
+
+  <div class="modal" id="billModal" hidden aria-hidden="true">
+    <div class="modal-bg" data-close></div>
+    <div class="modal-card big">
+      <div class="modal-h">
+        <h3 id="bmTitle">Bill</h3>
+        <button type="button" class="x" data-close aria-label="Close">&times;</button>
+      </div>
+      <div id="bmBody"></div>
+      <div class="modal-actions" id="bmActions"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="itemModal" hidden aria-hidden="true">
+    <div class="modal-bg" data-close-item></div>
+    <div class="modal-card">
+      <div class="modal-h">
+        <h3 id="imTitle">Add menu item</h3>
+        <button type="button" class="x" data-close-item aria-label="Close">&times;</button>
+      </div>
+      <form id="itemForm" class="item-form">
+        <input type="hidden" id="if_id">
+        <label>Name <input id="if_name" required maxlength="120"></label>
+        <label>Description <textarea id="if_desc" rows="2" maxlength="240"></textarea></label>
+        <div class="row2">
+          <label>Category <select id="if_category" required></select></label>
+          <label>Veg
+            <select id="if_veg">
+              <option value="">Not specified</option>
+              <option value="true">Vegetarian</option>
+              <option value="false">Non-Vegetarian</option>
+            </select>
+          </label>
+        </div>
+        <fieldset>
+          <legend>Variants &amp; Prices</legend>
+          <div id="if_variants"></div>
+          <button type="button" class="btn ghost small" id="if_addVariant">+ Add variant</button>
+        </fieldset>
+        <div class="modal-actions">
+          <button type="button" class="btn danger" id="if_delete" hidden>Delete</button>
+          <button type="button" class="btn ghost" data-close-item>Cancel</button>
+          <button type="submit" class="btn success">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="stewardModal" hidden aria-hidden="true">
+    <div class="modal-bg" data-close-steward></div>
+    <div class="modal-card">
+      <div class="modal-h">
+        <h3 id="sfModalTitle">Add steward</h3>
+        <button type="button" class="x" data-close-steward aria-label="Close">&times;</button>
+      </div>
+      <form id="stewardForm" class="item-form">
+        <input type="hidden" id="sf_id">
+        <label>Name <input id="sf_name" required maxlength="120"></label>
+        <label>PIN <input id="sf_pin" type="tel" maxlength="32" inputmode="numeric" autocomplete="off" aria-describedby="sf_pin_hint"></label>
+        <p id="sf_pin_hint" class="muted" style="margin:-4px 0 0;font-size:12px"></p>
+        <label style="display:flex;flex-direction:row;align-items:center;gap:10px">
+          <input type="checkbox" id="sf_active" checked> On duty (can log in and receive assignments)
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="btn danger" id="sf_delete" hidden>Delete</button>
+          <button type="button" class="btn ghost" data-close-steward>Cancel</button>
+          <button type="submit" class="btn success">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+  <script src="/shared/util.js"></script>
+  <script src="/admin/app.js"></script>
+</body>
+</html>

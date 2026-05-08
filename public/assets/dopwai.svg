@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 280" role="img" aria-label="Dopwai - the restaurant at Hotel Poinisuk">
+  <defs>
+    <linearGradient id="dop-stroke" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#7a1e1e"/>
+      <stop offset="100%" stop-color="#3a0d0d"/>
+    </linearGradient>
+    <linearGradient id="dop-leaf" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#c9a45f"/>
+      <stop offset="100%" stop-color="#7a5b1f"/>
+    </linearGradient>
+  </defs>
+
+  <text x="360" y="32" text-anchor="middle"
+        font-family="'Cinzel','Cormorant Garamond','Times New Roman',Georgia,serif"
+        font-weight="600" font-size="14" letter-spacing="9"
+        fill="#7a1e1e" opacity="0.85">HOTEL  POINISUK</text>
+
+  <line x1="200" y1="50" x2="520" y2="50" stroke="url(#dop-leaf)" stroke-width="0.8"/>
+
+  <text x="360" y="170" text-anchor="middle"
+        font-family="'Playfair Display','Cormorant Garamond','Times New Roman',Georgia,serif"
+        font-style="italic" font-weight="700" font-size="148" letter-spacing="-2"
+        fill="url(#dop-stroke)">Dopwai</text>
+
+  <g transform="translate(360 200)" opacity="0.85">
+    <path d="M -52 0 L -10 0" stroke="url(#dop-leaf)" stroke-width="1.2" fill="none"/>
+    <path d="M 10 0 L 52 0" stroke="url(#dop-leaf)" stroke-width="1.2" fill="none"/>
+    <path d="M 0 -8 C 4 -3 6 3 0 8 C -6 3 -4 -3 0 -8 Z" fill="url(#dop-leaf)"/>
+    <circle cx="-52" cy="0" r="1.6" fill="url(#dop-leaf)"/>
+    <circle cx="52"  cy="0" r="1.6" fill="url(#dop-leaf)"/>
+  </g>
+
+  <text x="360" y="244" text-anchor="middle"
+        font-family="'Cinzel','Cormorant Garamond','Times New Roman',Georgia,serif"
+        font-weight="500" font-size="14" letter-spacing="11"
+        fill="#3a0d0d" opacity="0.75">RESTAURANT</text>
+</svg>

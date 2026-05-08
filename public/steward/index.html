@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Steward - Hotel Poinisuk</title>
+  <meta name="theme-color" content="#1a1024">
+  <link rel="icon" href="/assets/logo.png">
+  <link rel="stylesheet" href="/shared/theme.css">
+  <link rel="stylesheet" href="/shared/kds.css">
+  <link rel="stylesheet" href="/steward-static/styles.css">
+</head>
+<body>
+  <div id="loginGate" class="login-gate">
+    <div class="login-card">
+      <img src="/assets/logo.png" alt="Hotel Poinisuk">
+      <h1>Steward Sign In</h1>
+      <p class="muted">Enter your steward PIN to receive assignments.</p>
+      <input id="pinInput" type="tel" maxlength="6" inputmode="numeric" placeholder="PIN" autocomplete="off">
+      <button class="btn" id="loginBtn">Sign In</button>
+      <p id="loginErr" class="loginerr"></p>
+      <details class="hint">
+        <summary>Forgot your PIN?</summary>
+        <p>Default PINs were seeded as <code>101</code> through <code>110</code> for stewards 1 - 10. Ask the manager to rotate them.</p>
+      </details>
+    </div>
+  </div>
+
+  <header class="kds-hdr" id="appHdr" hidden>
+    <img src="/assets/logo.png" alt="Hotel Poinisuk">
+    <div>
+      <div class="title" id="hdrTitle">Steward</div>
+      <div style="color:#d6c1e7;font-size:12px;letter-spacing:2px;text-transform:uppercase">My Assignments</div>
+    </div>
+    <span class="badge" id="hdrBadge">St #-</span>
+    <div class="right">
+      <span id="kdsCount">0 active</span>
+      <span class="pulse" title="live"></span>
+      <button class="btn ghost" id="logoutBtn" style="margin-left:10px">Sign out</button>
+    </div>
+  </header>
+
+  <main id="kdsGrid" class="kds-grid" hidden></main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/shared/util.js"></script>
+  <script src="/shared/notify.js"></script>
+  <script src="/steward-static/app.js"></script>
+</body>
+</html>

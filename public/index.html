@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Hotel Poinisuk - Restaurant Management Portal</title>
+  <link rel="icon" href="/assets/logo.png">
+  <link rel="stylesheet" href="/shared/theme.css">
+  <style>
+    body { background: linear-gradient(160deg, #faf8f5 0%, #f0e9f5 100%); min-height: 100vh; }
+    .land { max-width: 1100px; margin: 0 auto; padding: 36px 22px 60px; }
+    .head { text-align: center; margin-bottom: 36px; }
+    .head img { width: 110px; }
+    .head h1 { color: var(--primary); font-family: Georgia, serif; margin: 14px 0 6px; font-size: 32px; }
+    .head p { color: var(--muted); margin: 0; font-size: 14px; letter-spacing: .5px; }
+    .lede { color: var(--primary); margin-top: 18px; font-weight: 600; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; }
+    .grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .card { padding: 26px 22px; background: #fff; border-radius: 16px; border: 1px solid var(--line); box-shadow: 0 6px 22px rgba(74,29,114,.06); display: flex; flex-direction: column; }
+    .card .pill { display: inline-block; padding: 4px 12px; background: #f1ebf6; color: var(--primary); border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; align-self: flex-start; }
+    .card .pill.bar      { background: #fdf3df; color: #7a5b1f; }
+    .card .pill.kitchen  { background: #ffece1; color: #b15c00; }
+    .card .pill.steward  { background: #e8f0fc; color: #4a90e2; }
+    .card .pill.billing  { background: #e6f6ec; color: #2e7d4f; }
+    .card .pill.admin    { background: #f1ebf6; color: var(--primary); }
+    .card .pill.customer { background: #fdecea; color: #b3261e; }
+    .card h3 { margin: 12px 0 4px; color: var(--primary); font-family: Georgia, serif; font-size: 22px; }
+    .card .ico { font-size: 28px; }
+    .card .desc { color: var(--muted); font-size: 13px; line-height: 1.55; min-height: 62px; }
+    .card .url  { color: var(--muted); font-family: monospace; font-size: 11px; margin: 8px 0 14px; padding: 6px 10px; background: #faf7f2; border-radius: 6px; word-break: break-all; }
+    .card .actions { display: flex; gap: 8px; margin-top: auto; }
+    .card .actions .btn { flex: 1; }
+    .device { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; background: #faf7f2; border-radius: 999px; font-size: 11px; color: var(--muted); margin-top: 6px; align-self: flex-start; }
+    .device::before { content: '\u25CF'; font-size: 8px; color: #58e58a; }
+    .ftr { text-align: center; margin-top: 36px; color: var(--muted); font-size: 12px; }
+    .ftr code { background: #fff; padding: 2px 8px; border-radius: 4px; }
+    .pin-grid { display: grid; gap: 6px; grid-template-columns: repeat(5, 1fr); margin-top: 8px; }
+    .pin-grid a { font-family: monospace; padding: 8px; text-align: center; background: #fff; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); font-size: 13px; }
+    .pin-grid a:hover { border-color: var(--primary); color: var(--primary); }
+  </style>
+</head>
+<body>
+  <div class="land">
+    <div class="head">
+      <img src="/assets/logo.png" alt="Hotel Poinisuk">
+      <h1>Hotel Poinisuk</h1>
+      <p>Restaurant Management Portal &middot; Klong Lounge Bar &middot; Dopwai Restaurant</p>
+      <div class="lede">Open the right app on the right device</div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <span class="pill customer">Customer</span>
+        <span class="device">Guest's phone</span>
+        <h3>Order at Table</h3>
+        <p class="desc">Guests scan the QR printed on each table. Each QR encodes <code>/t/&lt;id&gt;?t=&lt;guest_token&gt;</code> so only that link can order or subscribe to table updates.</p>
+        <div class="url">/t/&lt;tableId&gt;?t=&lt;guest_token&gt;</div>
+        <div class="actions">
+          <a class="btn" href="/admin">Admin (QR codes)</a>
+        </div>
+        <p class="muted" style="margin-top:10px;font-size:12px;line-height:1.45">Print sheet: run <code style="font-size:11px">npm run qr</code> (writes <code style="font-size:11px">qr-codes/</code>).</p>
+      </div>
+
+      <div class="card">
+        <span class="pill kitchen">Dopwai</span>
+        <span class="device">Kitchen tablet / TV</span>
+        <h3>Kitchen Display</h3>
+        <p class="desc">All food KOTs in real-time. Audio + browser notification on every new ticket. Visual flash until accepted.</p>
+        <div class="url">/kitchen</div>
+        <div class="actions"><a class="btn" href="/kitchen">Open Kitchen</a></div>
+      </div>
+
+      <div class="card">
+        <span class="pill bar">Klong</span>
+        <span class="device">Bar tablet / TV</span>
+        <h3>Bar Display</h3>
+        <p class="desc">Live drink tickets for the bartender. Same notification system as the kitchen, station-isolated.</p>
+        <div class="url">/bar</div>
+        <div class="actions"><a class="btn" href="/bar">Open Bar</a></div>
+      </div>
+
+      <div class="card">
+        <span class="pill steward">Steward</span>
+        <span class="device">Each steward's phone</span>
+        <h3>Steward App</h3>
+        <p class="desc">PIN sign-in. Each steward sees only orders assigned to them and gets alerted when an order is ready.</p>
+        <div class="url">/steward (sign in with PIN 101 - 110)</div>
+        <div class="actions"><a class="btn" href="/steward">Open Steward Login</a></div>
+        <div class="pin-grid">
+          <a href="/steward/1">St #1</a>
+          <a href="/steward/2">St #2</a>
+          <a href="/steward/3">St #3</a>
+          <a href="/steward/4">St #4</a>
+          <a href="/steward/5">St #5</a>
+          <a href="/steward/6">St #6</a>
+          <a href="/steward/7">St #7</a>
+          <a href="/steward/8">St #8</a>
+          <a href="/steward/9">St #9</a>
+          <a href="/steward/10">St #10</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <span class="pill billing">Cashier</span>
+        <span class="device">Front-desk PC</span>
+        <h3>Billing Console</h3>
+        <p class="desc">All open tables, post-to-IDS, settle by cash / card / UPI / charge-to-room. Separate from admin.</p>
+        <div class="url">/billing</div>
+        <div class="actions"><a class="btn" href="/billing">Open Billing</a></div>
+      </div>
+
+      <div class="card">
+        <span class="pill admin">Manager</span>
+        <span class="device">Manager PC</span>
+        <h3>Admin Console</h3>
+        <p class="desc">Oversee everything. Live floor, all bills, menu editor with search / add / remove / price change, steward load, QR codes.</p>
+        <div class="url">/admin</div>
+        <div class="actions"><a class="btn" href="/admin">Open Admin</a></div>
+      </div>
+    </div>
+
+    <p class="ftr">HPRMS v1.1 &middot; Hotel Poinisuk &middot; Server: <code id="serverHost"></code></p>
+  </div>
+
+  <script>document.getElementById('serverHost').textContent = location.host;</script>
+</body>
+</html>

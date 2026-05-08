@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Billing - Hotel Poinisuk</title>
+  <link rel="icon" href="/assets/logo.png">
+  <link rel="stylesheet" href="/shared/theme.css">
+  <link rel="stylesheet" href="/billing-static/styles.css">
+</head>
+<body>
+  <div id="billLoginGate" class="login-gate">
+    <div class="login-card">
+      <img src="/assets/logo.png" alt="Hotel Poinisuk">
+      <h1>Billing desk</h1>
+      <p class="muted">Enter the billing PIN (<code>BILLING_PIN</code> or <code>ADMIN_PIN</code> in <code>.env</code>).</p>
+      <input id="billPinInput" type="password" maxlength="32" inputmode="numeric" autocomplete="current-password" placeholder="PIN" aria-label="Billing PIN">
+      <button type="button" class="btn" id="billLoginBtn">Sign in</button>
+      <p id="billLoginErr" class="loginerr"></p>
+    </div>
+  </div>
+
+  <header class="bill-hdr">
+    <div class="brand-mark">
+      <img src="/assets/logo.png" alt="Hotel Poinisuk">
+      <div>
+        <div class="name">Hotel Poinisuk</div>
+        <div class="sub">Front Desk &middot; Billing</div>
+      </div>
+    </div>
+    <div class="hdr-right">
+      <span id="idsDot" class="dot"></span>
+      <span id="idsLabel">IDS</span>
+      <span class="pulse" title="live"></span>
+      <button type="button" class="btn ghost" id="billLogoutBtn" style="margin-left:10px;font-size:12px;padding:8px 12px">Sign out</button>
+    </div>
+  </header>
+
+  <main class="bill-shell">
+    <section class="analytics-strip" aria-labelledby="analytics-heading">
+      <div class="analytics-h">
+        <h2 id="analytics-heading">Sales analytics</h2>
+        <span class="muted" id="analyticsMeta"></span>
+      </div>
+      <div class="analytics-filters">
+        <label class="af-field"><span class="af-lab">Day</span><input type="date" id="analyticsDayFilter" aria-label="Filter day"></label>
+        <label class="af-field"><span class="af-lab">Month</span><input type="month" id="analyticsMonthFilter" aria-label="Filter month"></label>
+        <button type="button" class="btn ghost af-reset" id="analyticsResetFilters">Reset to today</button>
+      </div>
+      <p class="muted analytics-note">Settled (paid) bills only. Pick day/month above &mdash; lists below show each bill (table, guest/room/pax if captured). Click a row for full detail.</p>
+      <div class="analytics-grid">
+        <div class="analytics-card klong">
+          <h3>Klong / Bar</h3>
+          <div class="analytics-metric">
+            <span class="lab">Day</span>
+            <span class="cnt" id="klong-day-bills">0 bills</span>
+            <span class="amt" id="klong-day-rev">&mdash;</span>
+          </div>
+          <div class="analytics-metric">
+            <span class="lab">Month</span>
+            <span class="cnt" id="klong-month-bills">0 bills</span>
+            <span class="amt" id="klong-month-rev">&mdash;</span>
+          </div>
+        </div>
+        <div class="analytics-card dopwai">
+          <h3>Dopwai / Restaurant</h3>
+          <div class="analytics-metric">
+            <span class="lab">Day</span>
+            <span class="cnt" id="dopwai-day-bills">0 bills</span>
+            <span class="amt" id="dopwai-day-rev">&mdash;</span>
+          </div>
+          <div class="analytics-metric">
+            <span class="lab">Month</span>
+            <span class="cnt" id="dopwai-month-bills">0 bills</span>
+            <span class="amt" id="dopwai-month-rev">&mdash;</span>
+          </div>
+        </div>
+      </div>
+      <div class="bill-period-toolbar">
+        <label class="bp-outlet">
+          <span class="muted">Outlet</span>
+          <select id="periodOutletFilter" aria-label="Filter bill list by outlet">
+            <option value="">All outlets</option>
+            <option value="klong">Klong / Bar</option>
+            <option value="dopwai">Dopwai / Restaurant</option>
+          </select>
+        </label>
+      </div>
+      <div class="bill-period-split">
+        <div class="bill-period-col">
+          <div class="bp-col-h">
+            <h3>Paid bills (selected day)</h3>
+            <span class="muted" id="periodDayMeta">0 bills</span>
+          </div>
+          <div id="periodDayList" class="period-bill-list" role="list"></div>
+          <p id="periodDayTruncate" class="period-truncate-note" hidden></p>
+        </div>
+        <div class="bill-period-col">
+          <div class="bp-col-h">
+            <h3>Paid bills (selected month)</h3>
+            <span class="muted" id="periodMonthMeta">0 bills</span>
+          </div>
+          <div id="periodMonthList" class="period-bill-list" role="list"></div>
+          <p id="periodMonthTruncate" class="period-truncate-note" hidden></p>
+        </div>
+      </div>
+    </section>
+
+    <div class="bill-main">
+      <section class="col">
+        <div class="col-h">
+          <h2>Tables Awaiting Bill</h2>
+          <span class="muted" id="awaitMeta">-</span>
+        </div>
+        <div id="awaitGrid" class="await-grid"></div>
+      </section>
+
+      <section class="col">
+        <div class="col-h">
+          <h2>Open Bills</h2>
+          <span class="muted" id="openMeta">-</span>
+        </div>
+        <div id="openBills" class="bill-list"></div>
+      </section>
+
+      <section class="col">
+        <div class="col-h">
+          <h2>Today&rsquo;s Settled</h2>
+          <span class="muted" id="settledMeta">-</span>
+        </div>
+        <div id="settledBills" class="bill-list compact"></div>
+      </section>
+    </div>
+  </main>
+
+  <div class="modal" id="billModal" hidden aria-hidden="true">
+    <div class="modal-bg" data-close></div>
+    <div class="modal-card">
+      <div class="modal-h">
+        <h3 id="bmTitle">Bill</h3>
+        <button type="button" class="x" data-close aria-label="Close">&times;</button>
+      </div>
+      <div id="bmBody"></div>
+      <div class="modal-actions" id="bmActions"></div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/shared/util.js"></script>
+  <script src="/shared/notify.js"></script>
+  <script src="/billing-static/app.js"></script>
+</body>
+</html>
