@@ -22,3 +22,12 @@ services:
         value: "1"
       - key: AUTH_SECRET
         generateValue: true
+      # Operator console PINs (same defaults as .env.example — change in Dashboard for real use)
+      - key: ADMIN_PIN
+        value: "2468"
+      - key: KITCHEN_PIN
+        value: "1111"
+      - key: BAR_PIN
+        value: "2222"
+      - key: BILLING_PIN
+        value: "4680"
