@@ -1,15 +1,20 @@
 # Render Blueprint: https://render.com/docs/blueprint-spec
-# After pushing, use Dashboard → New → Blueprint → connect repo, or attach this file to an existing Web Service.
+# If a deploy fails: Dashboard → hprms → Events (or Logs) for the exact error.
+# Typical fixes: native build for better-sqlite3 (pinned Node below), or set AUTH_SECRET manually if generateValue misbehaves.
 
 services:
   - type: web
     name: hprms
     runtime: node
     plan: free
-    buildCommand: npm install && npm install --prefix client && npm run build:customer
+    branch: main
+    region: oregon
+    buildCommand: npm ci && npm ci --prefix client && npm run build:customer
     startCommand: npm start
     healthCheckPath: /
     envVars:
+      - key: NODE_VERSION
+        value: 20.18.1
       - key: NODE_ENV
         value: production
       - key: TRUST_PROXY
