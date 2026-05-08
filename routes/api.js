@@ -19,6 +19,19 @@ const {
   assertOrderReadAllowed,
 } = require('../middleware/httpAuth');
 
+/** Strip accidental wrapping quotes from env (common when pasting into hosting dashboards). */
+function sanitizeEnvOperatorPin(raw) {
+  if (raw === undefined || raw === null) return '';
+  let s = String(raw).trim();
+  if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
+    s = s.slice(1, -1).trim();
+  }
+  if (s.startsWith('\u201c') && s.endsWith('\u201d')) {
+    s = s.slice(1, -1).trim();
+  }
+  return s;
+}
+
 router.get('/health', (req, res) => res.json({ ok: true, ts: new Date().toISOString() }));
 
 router.get('/config', (req, res) => {
@@ -39,7 +52,7 @@ function envPinRaw(role) {
     bar: process.env.BAR_PIN,
     billing: process.env.BILLING_PIN || process.env.ADMIN_PIN,
   };
-  return normalizeOperatorPin(map[role]);
+  return normalizeOperatorPin(sanitizeEnvOperatorPin(map[role]));
 }
 
 router.post('/auth/login', rateLimitLogin(), (req, res) => {
