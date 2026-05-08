@@ -1,6 +1,7 @@
 # Render Blueprint: https://render.com/docs/blueprint-spec
 # If a deploy fails: Dashboard → hprms → Events (or Logs) for the exact error.
 # Typical fixes: native build for better-sqlite3 (pinned Node below), or set AUTH_SECRET manually if generateValue misbehaves.
+# Client devDependencies (Vite) are required at build time; NODE_ENV=production would otherwise omit them from `npm ci`.
 
 services:
   - type: web
@@ -9,7 +10,7 @@ services:
     plan: free
     branch: main
     region: oregon
-    buildCommand: npm ci && npm ci --prefix client && npm run build:customer
+    buildCommand: npm ci && npm ci --prefix client --include=dev && npm run build:customer
     startCommand: npm start
     healthCheckPath: /
     envVars:
