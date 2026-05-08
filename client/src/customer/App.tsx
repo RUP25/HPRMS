@@ -268,8 +268,35 @@ function IncompleteQrLink() {
       <p>
         This menu link is missing the guest token (
         <code style={{ fontSize: 13 }}>?t=…</code>). Scan the QR printed for
-        your table after running <code style={{ fontSize: 13 }}>npm run qr</code>{' '}
-        on the server.
+        your table, or open <strong>Admin → QR codes</strong> on the live site
+        and use a link that includes <code style={{ fontSize: 13 }}>?t=…</code>.
+      </p>
+    </div>
+  );
+}
+
+function StaleGuestTableLink() {
+  return (
+    <div
+      style={{
+        padding: '60px 24px',
+        textAlign: 'center',
+        fontFamily: 'Georgia, serif',
+        color: '#7a1e1e',
+        maxWidth: 520,
+        margin: '0 auto',
+      }}
+    >
+      <h2>Table link out of date</h2>
+      <p style={{ lineHeight: 1.55 }}>
+        This QR or bookmark points at the right table, but the security token does
+        not match this server anymore (for example after a new deploy or a fresh
+        database). You can open the menu, but orders cannot be placed.
+      </p>
+      <p style={{ lineHeight: 1.55 }}>
+        Ask staff for a <strong>new QR</strong> from{' '}
+        <strong>Admin → QR codes</strong> on the same site you are ordering
+        from, or re-scan the table card generated from that system.
       </p>
     </div>
   );
@@ -1523,10 +1550,13 @@ export function App() {
     menu: MenuPayload;
   } | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [guestAuthError, setGuestAuthError] = useState<'stale' | null>(null);
 
   useEffect(() => {
     if (!tableId || !guestToken) return;
     window.HPRMS.setTableGuestAuth(tableId, guestToken);
+    setGuestAuthError(null);
+    setErr(null);
     let cancelled = false;
     (async () => {
       try {
@@ -1537,6 +1567,22 @@ export function App() {
           api('/menu') as Promise<MenuPayload>,
         ]);
         if (cancelled) return;
+        try {
+          await api(`/sessions/by-table/${tableId}`);
+        } catch (credErr) {
+          if (cancelled) return;
+          const msg =
+            credErr instanceof Error ? credErr.message : String(credErr);
+          if (
+            msg.includes('Invalid table credentials') ||
+            msg.includes('Token does not match')
+          ) {
+            setGuestAuthError('stale');
+            return;
+          }
+          setErr(msg || 'Could not verify table link');
+          return;
+        }
         setData({ cfg, table, menu });
         setPhase(reduceMotion ? 'guest' : 'intro');
       } catch (e) {
@@ -1553,6 +1599,7 @@ export function App() {
 
   if (!tableId) return <InvalidTable />;
   if (!guestToken) return <IncompleteQrLink />;
+  if (guestAuthError === 'stale') return <StaleGuestTableLink />;
   if (err && !data) {
     return (
       <p style={{ padding: 48, textAlign: 'center', color: '#b3261e' }}>
