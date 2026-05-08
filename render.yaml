@@ -29,5 +29,4 @@ services:
         value: "1111"
       - key: BAR_PIN
         value: "2222"
-      - key: BILLING_PIN
-        value: "4680"
+      # Omit BILLING_PIN so /billing uses ADMIN_PIN (one demo PIN). Set BILLING_PIN in Dashboard for a separate cashier PIN.
