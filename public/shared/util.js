@@ -36,6 +36,19 @@ window.HPRMS = (function () {
     sessionStorage.removeItem(OP_TOKEN_KEY);
   }
 
+  /** Match server /auth/login: NFKC + strip bidi/invisible + digits only (tel/password autofill on iOS). */
+  function normalizeOperatorPinInput(raw) {
+    if (raw == null) return '';
+    let s = String(raw).trim();
+    s = s.replace(/[\u200B-\u200D\uFEFF\u202A-\u202E\u2066-\u2069\u200E\u200F]/g, '');
+    try {
+      s = s.normalize('NFKC');
+    } catch (_) {
+      /* ignore */
+    }
+    return s.replace(/\D/g, '');
+  }
+
   /** Guest ordering + socket: send X-Table-Token on each API request */
   function setTableGuestAuth(tableId, token) {
     tableGuestAuth =
@@ -110,5 +123,6 @@ window.HPRMS = (function () {
     getOperatorToken,
     clearOperatorToken,
     setTableGuestAuth,
+    normalizeOperatorPinInput,
   };
 })();

@@ -1,6 +1,6 @@
 /* Shared kitchen / bar display logic. Pass station = "BAR" or "KITCHEN" */
 window.HPRMS_KDS = function (station) {
-  const { api, fmtTime, elapsed, toast, connectSocket, setOperatorToken, clearOperatorToken } =
+  const { api, fmtTime, elapsed, toast, connectSocket, setOperatorToken, clearOperatorToken, normalizeOperatorPinInput } =
     window.HPRMS;
   const N = window.HPRMSNotify;
   const stationLabel = station === 'BAR' ? 'Klong Bar' : 'Dopwai Kitchen';
@@ -202,7 +202,7 @@ window.HPRMS_KDS = function (station) {
 
   async function doLogin() {
     $('#kdsLoginErr').textContent = '';
-    const pin = $('#kdsPinInput').value.trim();
+    const pin = normalizeOperatorPinInput($('#kdsPinInput').value);
     if (!pin) {
       $('#kdsLoginErr').textContent = 'Enter PIN.';
       return;

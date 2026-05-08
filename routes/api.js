@@ -18,6 +18,7 @@ const {
   assertTransitionAllowed,
   assertOrderReadAllowed,
 } = require('../middleware/httpAuth');
+const { foldDecimalNdToAscii } = require('../services/pinDigitFold');
 
 /** Strip accidental wrapping quotes from env (common when pasting into hosting dashboards). */
 function sanitizeEnvOperatorPin(raw) {
@@ -45,22 +46,28 @@ router.get('/config', (req, res) => {
   });
 });
 
-function envPinRaw(role) {
+/** Operator console PINs are numeric; fold Nd digits then strip non-digits (spaces/autofill). */
+function comparableOperatorPin(raw) {
+  const folded = foldDecimalNdToAscii(
+    normalizeOperatorPin(raw === undefined || raw === null ? '' : String(raw)),
+  );
+  return folded.replace(/\D/g, '');
+}
+
+function envPinComparable(role) {
   const map = {
     admin: process.env.ADMIN_PIN,
     kitchen: process.env.KITCHEN_PIN,
     bar: process.env.BAR_PIN,
     billing: process.env.BILLING_PIN || process.env.ADMIN_PIN,
   };
-  return normalizeOperatorPin(sanitizeEnvOperatorPin(map[role]));
+  return comparableOperatorPin(sanitizeEnvOperatorPin(map[role]));
 }
 
 router.post('/auth/login', rateLimitLogin(), (req, res) => {
   const role = ((req.body && req.body.role) || '').toString().trim();
   const pinRaw = req.body && req.body.pin;
-  const pin =
-    pinRaw === undefined || pinRaw === null ? '' : String(pinRaw).trim();
-  const env = envPinRaw(role);
+  const env = envPinComparable(role);
   if (!role || !['admin', 'kitchen', 'bar', 'billing'].includes(role)) {
     return res.status(400).json({ error: 'Invalid role' });
   }
@@ -68,15 +75,17 @@ router.post('/auth/login', rateLimitLogin(), (req, res) => {
     console.warn('[hprms] auth/login: missing PIN in env for role:', role);
     return res.status(503).json({ error: 'Login not configured for this role' });
   }
+  const pin = comparableOperatorPin(
+    pinRaw === undefined || pinRaw === null ? '' : String(pinRaw),
+  );
   if (!pin) {
     return res.status(400).json({ error: 'PIN required' });
   }
   if (!pinOk(env, pin)) {
-    const gn = normalizeOperatorPin(pin);
     console.warn(
       '[hprms] auth/login failed role=%s (normalized PIN lengths submitted=%d expected=%d)',
       role,
-      gn.length,
+      pin.length,
       env.length
     );
     return res.status(401).json({ error: 'Invalid PIN' });

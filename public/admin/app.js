@@ -1,5 +1,5 @@
 (function () {
-  const { api, fmtMoney, fmtTime, toast, connectSocket, setOperatorToken, clearOperatorToken, getOperatorToken } =
+  const { api, fmtMoney, fmtTime, toast, connectSocket, setOperatorToken, clearOperatorToken, getOperatorToken, normalizeOperatorPinInput } =
     window.HPRMS;
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => Array.from(document.querySelectorAll(s));
@@ -22,7 +22,7 @@
 
   async function adminLogin() {
     $('#admLoginErr').textContent = '';
-    const pin = $('#admPinInput').value.trim();
+    const pin = normalizeOperatorPinInput($('#admPinInput').value);
     if (!pin) {
       $('#admLoginErr').textContent = 'Enter PIN.';
       return;
