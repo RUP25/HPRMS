@@ -11,14 +11,45 @@ const fs = require('fs');
 const QRCode = require('qrcode');
 const { init: initDb, getDb } = require('../db/init');
 
-const BASE =
-  String(process.env.PUBLIC_BASE_URL || '')
+const LOCAL_QR_BASE = `http://localhost:${process.env.PORT || 3000}`;
+/** Live demo when generating QRs without a real public URL in env. */
+const DEMO_DEPLOY_QR_BASE = 'https://hprms.onrender.com';
+
+function trimBase(s) {
+  return String(s || '')
     .trim()
-    .replace(/\/$/, '') ||
-  String(process.env.RENDER_EXTERNAL_URL || '')
-    .trim()
-    .replace(/\/$/, '') ||
-  `http://localhost:${process.env.PORT || 3000}`;
+    .replace(/\/$/, '');
+}
+
+function isLocalBaseUrl(s) {
+  try {
+    const u = new URL(s.includes('://') ? s : `http://${s}`);
+    const h = u.hostname.toLowerCase();
+    return h === 'localhost' || h === '127.0.0.1' || h === '::1';
+  } catch (_) {
+    return /^localhost\b/i.test(s) || /^127\.0\.0\.1\b/.test(s);
+  }
+}
+
+/**
+ * Order: QR_PUBLIC_BASE_URL → non-local PUBLIC_BASE_URL → RENDER_EXTERNAL_URL →
+ * (QR_LOCAL_ONLY or local PUBLIC_BASE_URL) → localhost → demo deploy host.
+ * `PUBLIC_BASE_URL` alone may be localhost for day-to-day dev; QR CLI still targets the live demo unless QR_LOCAL_ONLY=1.
+ */
+function resolveQrBaseUrl() {
+  const qrOnly = trimBase(process.env.QR_PUBLIC_BASE_URL);
+  if (qrOnly) return qrOnly;
+  const pub = trimBase(process.env.PUBLIC_BASE_URL);
+  if (pub && !isLocalBaseUrl(pub)) return pub;
+  const render = trimBase(process.env.RENDER_EXTERNAL_URL);
+  if (render) return render;
+  const localOnly = /^(1|true|yes)$/i.test(String(process.env.QR_LOCAL_ONLY || '').trim());
+  if (localOnly && pub) return pub;
+  if (localOnly) return LOCAL_QR_BASE;
+  return DEMO_DEPLOY_QR_BASE;
+}
+
+const BASE = resolveQrBaseUrl();
 const OUT = path.join(__dirname, '..', 'qr-codes');
 const COUNT = parseInt(process.env.TABLE_COUNT || '20', 10);
 const KLONG_TABLES = parseInt(process.env.KLONG_TABLES || '8', 10);
@@ -77,6 +108,11 @@ async function main() {
   fs.writeFileSync(html, indexLines.join('\n'));
   console.log(`\nPrint sheet: ${html}`);
   console.log(`Open it in a browser and use Ctrl/Cmd-P to print.`);
+  if (/\bonrender\.com\b/i.test(BASE)) {
+    console.log(
+      '[qr] Tokens are from the SQLite DB on this machine. If that DB is not the one your live site uses, open /admin on the live site (QR section) or run this script on Render Shell after deploy.',
+    );
+  }
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });
