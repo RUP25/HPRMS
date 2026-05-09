@@ -588,15 +588,25 @@
     const grid = $('#qrGrid');
     grid.innerHTML = '';
     const tables = await api('/tables');
+    tables.sort((a, b) => a.id - b.id);
     const base = location.origin;
+    const meta = $('#qrMeta');
+    if (meta) {
+      meta.textContent =
+        tables.length > 0
+          ? `Showing ${tables.length} table(s), IDs ${tables[0].id}–${tables[tables.length - 1].id}. Scroll to see all.`
+          : 'No tables in database — check TABLE_COUNT and restart.';
+    }
     for (const t of tables) {
       const card = document.createElement('div');
       card.className = 'qr-card';
       const url = base + '/t/' + t.id + '?t=' + encodeURIComponent(t.guest_token || '');
+      const outletLabel = t.outlet === 'klong' ? 'Klong (Bar)' : 'Dopwai (Restaurant)';
       card.innerHTML = `
+        <div class="qr-card__id">Table ID <strong>#${t.id}</strong></div>
         <canvas></canvas>
-        <div class="lab">${t.label}</div>
-        <div class="muted" style="font-size:11px;text-transform:uppercase;letter-spacing:2px">${t.outlet === 'klong' ? 'Klong' : 'Dopwai'}</div>
+        <div class="lab">${t.label || 'Table ' + t.id}</div>
+        <div class="muted" style="font-size:11px;text-transform:uppercase;letter-spacing:2px">${outletLabel}</div>
         <div class="url">${url}</div>`;
       grid.appendChild(card);
       QRCode.toCanvas(card.querySelector('canvas'), url, { width: 200, margin: 1 });

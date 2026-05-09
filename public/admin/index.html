@@ -88,8 +88,13 @@
 
     <section id="tab-qr" class="tab-panel" hidden>
       <div class="tab-h"><h2>Table QR Codes</h2></div>
-      <p class="muted">Print these and place on the corresponding tables. Guests scan to open the menu.</p>
-      <p class="muted">Run <code>npm run qr</code> in the project root to (re)generate a printable PDF/HTML sheet in the <code>qr-codes/</code> folder.</p>
+      <p class="muted">
+        One QR per physical table (default setup: <strong>IDs 1–20</strong>). Tables
+        <strong>1–8</strong> are <strong>Klong (bar)</strong>; <strong>9–20</strong> are
+        <strong>Dopwai (restaurant)</strong> (change via <code>TABLE_COUNT</code> / <code>KLONG_TABLES</code> in env).
+        Kitchen, bar, stewards, and billing all use this <strong>table ID</strong> on every order and bill.
+      </p>
+      <p class="muted" id="qrMeta" style="margin-bottom:8px"></p>
       <div id="qrGrid" class="qr-grid"></div>
     </section>
   </main>

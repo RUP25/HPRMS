@@ -30,3 +30,9 @@ services:
       - key: BAR_PIN
         value: "2222"
       # Omit BILLING_PIN so /billing uses ADMIN_PIN (one demo PIN). Set BILLING_PIN in Dashboard for a separate cashier PIN.
+      - key: TABLE_COUNT
+        value: "20"
+      - key: KLONG_TABLES
+        value: "8"
+      - key: STEWARD_COUNT
+        value: "10"

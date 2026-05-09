@@ -166,15 +166,16 @@ function migrate(db) {
 }
 
 function seedTables(db) {
-  const have = db.prepare('SELECT COUNT(*) AS c FROM tables').get().c;
-  if (have >= TABLE_COUNT) return;
+  const klongTables = Math.min(
+    TABLE_COUNT,
+    Math.max(1, parseInt(process.env.KLONG_TABLES || '8', 10)),
+  );
   const insert = db.prepare(
     'INSERT OR IGNORE INTO tables (id, label, outlet, capacity, guest_token) VALUES (?, ?, ?, ?, ?)'
   );
   const tx = db.transaction(() => {
     for (let i = 1; i <= TABLE_COUNT; i++) {
-      // Tables 1-8 -> Klong (bar), 9-20 -> Dopwai (restaurant)
-      const outlet = i <= 8 ? 'klong' : 'dopwai';
+      const outlet = i <= klongTables ? 'klong' : 'dopwai';
       insert.run(i, `Table ${i}`, outlet, 4, crypto.randomBytes(16).toString('hex'));
     }
   });
@@ -182,19 +183,16 @@ function seedTables(db) {
 }
 
 function seedStewards(db) {
-  const have = db.prepare('SELECT COUNT(*) AS c FROM stewards').get().c;
-  if (have >= STEWARD_COUNT) return;
+  const insert = db.prepare(
+    'INSERT OR IGNORE INTO stewards (id, name, pin, active) VALUES (?, ?, ?, 1)'
+  );
   const names = [
     'Rohan',  'Aarav',  'Anish',  'Karan',  'Daniel',
     'Eli',    'Banti',  'Rishav', 'Shivam', 'Pranay',
   ];
-  const insert = db.prepare(
-    'INSERT OR IGNORE INTO stewards (id, name, pin, active) VALUES (?, ?, ?, 1)'
-  );
   const tx = db.transaction(() => {
     for (let i = 1; i <= STEWARD_COUNT; i++) {
       const name = names[i - 1] || `Steward ${i}`;
-      // Default PIN = 100 + id (101..110); operations should rotate these in production.
       const pin = String(100 + i);
       insert.run(i, name, pin);
     }
