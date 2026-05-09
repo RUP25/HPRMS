@@ -586,13 +586,34 @@
     };
   }
 
-  // ---------- QR codes ----------
+  // ---------- QR codes (needs qrcode UMD with /build — use 1.4.x; 1.5 npm dropped browser bundle) ----------
   function qrDrawToCanvas(canvas, text) {
     return new Promise((resolve, reject) => {
+      if (typeof QRCode === 'undefined') {
+        reject(new Error('QRCode library not loaded'));
+        return;
+      }
       try {
         QRCode.toCanvas(canvas, text, { width: 200, margin: 1 }, (err) => {
           if (err) reject(err);
           else resolve();
+        });
+      } catch (e) {
+        reject(e);
+      }
+    });
+  }
+
+  function qrToDataUrl(text) {
+    return new Promise((resolve, reject) => {
+      if (typeof QRCode === 'undefined') {
+        reject(new Error('QRCode library not loaded'));
+        return;
+      }
+      try {
+        QRCode.toDataURL(text, { width: 200, margin: 1, errorCorrectionLevel: 'M' }, (err, dataUrl) => {
+          if (err) reject(err);
+          else resolve(dataUrl);
         });
       } catch (e) {
         reject(e);
@@ -620,21 +641,42 @@
       const outletLabel = t.outlet === 'klong' ? 'Klong (Bar)' : 'Dopwai (Restaurant)';
       card.innerHTML = `
         <div class="qr-card__id">Table ID <strong>#${t.id}</strong></div>
-        <canvas width="200" height="200" class="qr-canvas"></canvas>
+        <div class="qr-slot"></div>
         <div class="lab">${t.label || 'Table ' + t.id}</div>
         <div class="muted" style="font-size:11px;text-transform:uppercase;letter-spacing:2px">${outletLabel}</div>
         <div class="url">${url}</div>`;
       grid.appendChild(card);
-      const canvas = card.querySelector('canvas');
+      const slot = card.querySelector('.qr-slot');
+      let ok = false;
       try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 200;
+        canvas.height = 200;
+        canvas.className = 'qr-canvas';
         await qrDrawToCanvas(canvas, url);
-      } catch (e) {
-        console.warn('[hprms] QR render failed table', t.id, e);
-        const p = document.createElement('p');
-        p.className = 'muted';
-        p.style.cssText = 'font-size:12px;margin:8px 0';
-        p.textContent = 'QR failed to render — use the URL below or refresh.';
-        canvas.replaceWith(p);
+        slot.appendChild(canvas);
+        ok = true;
+      } catch (e1) {
+        console.warn('[hprms] QR canvas failed table', t.id, e1);
+      }
+      if (!ok) {
+        try {
+          const dataUrl = await qrToDataUrl(url);
+          const img = document.createElement('img');
+          img.className = 'qr-img';
+          img.src = dataUrl;
+          img.alt = 'QR Table ' + t.id;
+          img.width = 200;
+          img.height = 200;
+          slot.appendChild(img);
+          ok = true;
+        } catch (e2) {
+          console.warn('[hprms] QR dataURL failed table', t.id, e2);
+        }
+      }
+      if (!ok) {
+        slot.innerHTML =
+          '<p class="muted" style="font-size:12px;margin:0;padding:8px">QR failed to render — use the URL below.</p>';
       }
     }
   }
