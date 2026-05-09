@@ -69,7 +69,7 @@
     setupItemForm();
     setupStewardForm();
 
-    await Promise.all([refreshFloor(), refreshMenu(), renderQR(), refreshStewards()]);
+    await Promise.all([refreshFloor(), refreshMenu(), refreshStewards()]);
     refreshBills();
 
     const sock = connectSocket(['role:admin']);
@@ -95,6 +95,9 @@
       if (tab === 'bills')    refreshBills();
       if (tab === 'stewards') refreshStewards();
       if (tab === 'menu')     refreshMenu();
+      if (tab === 'qr') {
+        requestAnimationFrame(() => requestAnimationFrame(() => void renderQR()));
+      }
     }));
   }
 
@@ -584,6 +587,19 @@
   }
 
   // ---------- QR codes ----------
+  function qrDrawToCanvas(canvas, text) {
+    return new Promise((resolve, reject) => {
+      try {
+        QRCode.toCanvas(canvas, text, { width: 200, margin: 1 }, (err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      } catch (e) {
+        reject(e);
+      }
+    });
+  }
+
   async function renderQR() {
     const grid = $('#qrGrid');
     grid.innerHTML = '';
@@ -604,12 +620,22 @@
       const outletLabel = t.outlet === 'klong' ? 'Klong (Bar)' : 'Dopwai (Restaurant)';
       card.innerHTML = `
         <div class="qr-card__id">Table ID <strong>#${t.id}</strong></div>
-        <canvas></canvas>
+        <canvas width="200" height="200" class="qr-canvas"></canvas>
         <div class="lab">${t.label || 'Table ' + t.id}</div>
         <div class="muted" style="font-size:11px;text-transform:uppercase;letter-spacing:2px">${outletLabel}</div>
         <div class="url">${url}</div>`;
       grid.appendChild(card);
-      QRCode.toCanvas(card.querySelector('canvas'), url, { width: 200, margin: 1 });
+      const canvas = card.querySelector('canvas');
+      try {
+        await qrDrawToCanvas(canvas, url);
+      } catch (e) {
+        console.warn('[hprms] QR render failed table', t.id, e);
+        const p = document.createElement('p');
+        p.className = 'muted';
+        p.style.cssText = 'font-size:12px;margin:8px 0';
+        p.textContent = 'QR failed to render — use the URL below or refresh.';
+        canvas.replaceWith(p);
+      }
     }
   }
 

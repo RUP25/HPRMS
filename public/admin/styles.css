@@ -143,6 +143,9 @@
 .tile.awaiting_bill .pill { background: #fde2c4; color: #7a3f00; }
 .tile.occupied .pill { background: #f1ebf6; color: var(--primary); }
 
+#tab-qr.tab-panel {
+  overflow: visible;
+}
 .qr-grid {
   display: grid; gap: 16px;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
